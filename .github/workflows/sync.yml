@@ -20,10 +20,12 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Clean issue notice
-        uses: actions-cool/issues-helper@e361abf610221f09495ad510cb1e69328d839e1c # v3.7.6
-        with:
-          actions: 'close-issues'
-          labels: '🚨 Sync Fail'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for issue in $(gh issue list --label "🚨 Sync Fail" --state open --json number --jq '.[].number'); do
+            gh issue close "$issue"
+          done
 
       - name: Sync upstream changes
         id: sync
@@ -37,13 +39,14 @@ jobs:
 
       - name: Sync check
         if: failure()
-        uses: actions-cool/issues-helper@e361abf610221f09495ad510cb1e69328d839e1c # v3.7.6
-        with:
-          actions: 'create-issue'
-          title: '🚨 同步失败 | Sync Fail'
-          labels: '🚨 Sync Fail'
-          body: |
-            Due to a change in the workflow file of the [LobeChat][lobechat] upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork. Please refer to the detailed [Tutorial][tutorial-en-US] for instructions.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$(gh issue list --label "🚨 Sync Fail" --state open --json number --jq '.[].number')" ]; then
+            gh issue create \
+              --title "🚨 同步失败 | Sync Fail" \
+              --label "🚨 Sync Fail" \
+              --body "Due to a change in the workflow file of the [LobeChat][lobechat] upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork. Please refer to the detailed [Tutorial][tutorial-en-US] for instructions.
 
             由于 [LobeChat][lobechat] 上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次，请查看 [详细教程][tutorial-zh-CN]
 
@@ -51,4 +54,5 @@ jobs:
 
             [lobechat]: https://github.com/lobehub/lobe-chat
             [tutorial-zh-CN]: https://lobehub.com/zh/docs/self-hosting/advanced/upstream-sync
-            [tutorial-en-US]: https://lobehub.com/docs/self-hosting/advanced/upstream-sync
+            [tutorial-en-US]: https://lobehub.com/docs/self-hosting/advanced/upstream-sync"
+          fi
