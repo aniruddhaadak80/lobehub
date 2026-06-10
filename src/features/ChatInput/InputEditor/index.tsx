@@ -450,7 +450,6 @@ const InputEditor = memo<{
   return (
     <Editor
       autoFocus
-      pasteAsPlainText
       className={className}
       content={''}
       editor={editor}
