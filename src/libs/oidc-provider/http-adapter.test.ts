@@ -75,6 +75,7 @@ describe('OIDC HTTP adapter', () => {
       }) as unknown as NextRequest;
 
       const { createNodeRequest } = await import('./http-adapter');
+      // @ts-expect-error - selective_body.js doesn't have type definitions
       const { urlencoded } = (await import('oidc-provider/lib/shared/selective_body.js')) as {
         urlencoded: (ctx: any, next: () => Promise<void>) => Promise<void>;
       };
@@ -82,7 +83,7 @@ describe('OIDC HTTP adapter', () => {
       const ctx = {
         charset: 'utf-8',
         is: (contentType: string) => contentType === 'application/x-www-form-urlencoded',
-        oidc: {},
+        oidc: {} as any,
         req: nodeRequest,
         request: { length: Buffer.byteLength(body) },
       };
