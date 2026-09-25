@@ -6,7 +6,7 @@ import { LOADING_FLAT } from '@/const/message';
 import { generateMarkdown } from './template';
 
 describe('generateMarkdown', () => {
-  // ??????????
+  // 创建测试用的消息数据
   const mockMessages = [
     {
       id: '1',
